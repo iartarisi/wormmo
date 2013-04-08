@@ -43,3 +43,8 @@
 (draw-cell board "red" 4 7)
 (draw-cell board "red" 4 8)
 (draw-cell board "red" 4 9)
+
+(defn refresh
+  [game-hash]
+  (let [game (js->clj game-hash)]
+    (draw-snake (game "me"))))

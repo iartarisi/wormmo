@@ -21,9 +21,8 @@
     (.send ws-ch (json/write-str {:type "upcase"
                                   :message (format "Player %s Time %s" @client-count
                                                    (String. payload "UTF-8"))})))
-  (println (new-snake))
-  (.send ws-ch (json/write-str {:type "new_snake"
-                                :snake (new-snake)}))
+  (.send ws-ch (json/write-str {:type "refresh"
+                                :game (new-snake)}))
   (let [queue-name (format "consumer.%s" @client-count)]
     (lq/declare rch queue-name :exclusive false :auto-delete true)
     (lq/bind rch queue-name topic-name)

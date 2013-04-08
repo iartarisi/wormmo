@@ -10,8 +10,8 @@
   []
   (let [safety 5 ;; don't start the snake with its face in the wall
         edge (- board-size snake-size safety)
-        start-x edge
-        start-y edge]
-    (map vector
-         (repeat snake-size start-x)
-         (range start-y (+ start-y snake-size)))))
+        start-x (rand-int edge)
+        start-y (rand-int edge)]
+    {:me (map vector
+              (repeat snake-size start-x)
+              (range start-y (+ start-y snake-size)))}))
