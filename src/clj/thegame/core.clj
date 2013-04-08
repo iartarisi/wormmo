@@ -24,7 +24,7 @@
                                   :message (format "Player %s Time %s" @client-count
                                                    (String. payload "UTF-8"))})))
   (.send ws-ch (json/write-str {:type "refresh"
-                                :game (new-snake)}))
+                                :game (new-player)}))
   (let [qname (queue-name @client-count)]
     (lq/declare rch qname :exclusive false :auto-delete true)
     (lq/bind rch qname topic-name)
