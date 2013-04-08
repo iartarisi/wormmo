@@ -11,7 +11,9 @@
            [org.webbitserver.handler StaticFileHandler])
   (:use [thegame.snake]))
 
-(def consumer-count 0)
+(defn queue-name
+  [n]
+  (format "player.%s" n))
 
 (defn start-consumer
   "Starts a consumer bound to the given topic exchange in a separate thread"
@@ -23,10 +25,10 @@
                                                    (String. payload "UTF-8"))})))
   (.send ws-ch (json/write-str {:type "refresh"
                                 :game (new-snake)}))
-  (let [queue-name (format "consumer.%s" @client-count)]
-    (lq/declare rch queue-name :exclusive false :auto-delete true)
-    (lq/bind rch queue-name topic-name)
-    (.start (Thread. #(lc/subscribe rch queue-name handler :auto-ack true)))))
+  (let [qname (queue-name @client-count)]
+    (lq/declare rch qname :exclusive false :auto-delete true)
+    (lq/bind rch qname topic-name)
+    (.start (Thread. #(lc/subscribe rch qname handler :auto-ack true)))))
 
 (defn ws-on_message
   [channel message client-count]
