@@ -11,7 +11,8 @@
     </script>
     <script>
       var ws = $.websocket("ws://127.0.0.1:8080/websocket", {
-      events: { 
+      events: {
+      new_snake: function(e) { snake.draw_snake(e.snake); },
       upcase: function(e) { $("#content").html(e.message); }}});
 
       $('#message').change(function(){

@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/clojurescript "0.0-1586"]
                  [org.webbitserver/webbit "0.4.14"]
+                 [org.clojure/data.json  "0.2.2"]
                  [com.novemberain/langohr "1.0.0-beta12"]]
   :source-paths ["src/clj"]
   :plugins [[lein-cljsbuild "0.2.7"]]

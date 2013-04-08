@@ -14,6 +14,11 @@
   (let [start (Math/round (/ (* (Math/random) (- (board :size) cell-width))
                              cell-width))]))
 
+(defn draw-snake
+  [cells]
+  (doseq [[x y] cells]
+    (draw-cell board "green" x y)))
+
 (defn draw-cell
   [board color x y]
   (doto (board :context)
