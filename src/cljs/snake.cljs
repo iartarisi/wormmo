@@ -31,9 +31,8 @@
     (#(set! (. % -strokeStyle) "black"))
     (.strokeRect 0 0 (board :size) (board :size))))
 
-(draw-board board)
-
 (defn refresh
   [game-hash]
+  (draw-board board)
   (let [game (js->clj game-hash)]
     (draw-snake (game "me"))))

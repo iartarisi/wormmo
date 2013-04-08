@@ -15,17 +15,23 @@
   [n]
   (format "player.%s" n))
 
-(defn start-consumer
-  "Starts a consumer bound to the given topic exchange in a separate thread"
-  [ws-ch rch topic-name client-count]
-  (defn handler
+(defn create-handler
+  [ws-ch player]
+  (fn
     [rch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
     (.send ws-ch (json/write-str {:type "upcase"
-                                  :message (format "Player %s Time %s" @client-count
-                                                   (String. payload "UTF-8"))})))
+                                  :message (format "Player %s Time %s" player
+                                                   (String. payload "UTF-8"))}))
+    (.send ws-ch (json/write-str {:type "refresh"
+                                  :game (new-player)}))))
+
+(defn start-consumer
+  "Starts a consumer bound to the given topic exchange in a separate thread"
+  [ws-ch rch topic-name player]
   (.send ws-ch (json/write-str {:type "refresh"
                                 :game (new-player)}))
-  (let [qname (queue-name @client-count)]
+  (let [qname (queue-name @player)
+        handler (create-handler ws-ch @player)]
     (lq/declare rch qname :exclusive false :auto-delete true)
     (lq/bind rch qname topic-name)
     (.start (Thread. #(lc/subscribe rch qname handler :auto-ack true)))))
@@ -70,7 +76,7 @@
     (create-websocket channel)
     (while true
       (lb/publish channel exchange "" (str (new java.util.Date))
-                  :content-type "text/plain" :type "hello")
+                  :content-type "text/plain" :type "time")
       (Thread/sleep 2000))
     (rmq/close channel)
     (rmq/close conn)))
