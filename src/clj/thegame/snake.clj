@@ -16,7 +16,8 @@
         snake {:cells (map vector
                            (repeat snake-size start-x)
                            (range (+ start-y snake-size) start-y -1))
-               :head [start-x start-y]}]
+               :head [start-x start-y]
+               :direction "^"}]
     (swap! world update-in [:snakes] assoc player snake)
     (println world)
     {:me snake}))
@@ -26,11 +27,20 @@
   [world player]
   (swap! world update-in [:snakes] dissoc player))
 
+(defn cell-forward
+  "Move a cell one step forward"
+  [[x y] direction]
+  (case direction
+    "^" (if (= y 0)
+          [x (dec board-size)]
+          [x (dec y)])))
+
 (defn snake-forward
   "Move the snake forward one cell"
   [snake]
-  {:cells (concat (rest (snake :cells)) (list (snake :head)))
-   :head [((snake :head) 0) (- ((snake :head) 1) 1)]})
+  {:cells (map #(cell-forward % (snake :direction)) (snake :cells))
+   :head (cell-forward (snake :head) (snake :direction))
+   :direction (snake :direction)})
 
 (defn tick
   "Make one iteration in the world"
@@ -47,4 +57,3 @@
            :others (dissoc (@world :snakes) player)}]
     (println w)
     w))
-
