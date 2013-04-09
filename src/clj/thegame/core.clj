@@ -54,6 +54,7 @@
 
 (defn ws-on_close
   [channel client-count]
+  ;; TODO this should be a call via rabbitmq to the server
   (delete-player world @client-count)
   (println "closed" channel client-count)
   (swap! client-count dec))

@@ -43,7 +43,8 @@
 (defn see-world
   "Get the world as it's seen by a player"
   [world player]
-  (let [w {:me ((@world :snakes) player)}]
+  (let [w {:me ((@world :snakes) player)
+           :others (dissoc (@world :snakes) player)}]
     (println w)
     w))
 

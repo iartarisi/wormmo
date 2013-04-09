@@ -18,10 +18,10 @@
     (.strokeRect (* x cell-width) (* y cell-width) cell-width cell-width)))
 
 (defn draw-snake
-  [{:strs [cells head]}]
+  [{:strs [cells head]} color]
   (doseq [c cells]
-    (draw-cell board "green" "white" c))
-  (draw-cell board "white" "green" head))
+    (draw-cell board color "white" c))
+  (draw-cell board "white" color head))
 
 (defn draw-board
   [board]
@@ -34,5 +34,8 @@
 (defn refresh
   [game-hash]
   (draw-board board)
-  (let [game (js->clj game-hash)]
-    (draw-snake (game "me"))))
+  (let [world (js->clj game-hash)]
+    (draw-snake (world "me") "green")
+    (doseq [s (vals (world "others"))]
+      (draw-snake s "red"))))
+    ;; (map #(draw-snake % "red") (vals (world "others")))))
