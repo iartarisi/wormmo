@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/clojurescript "0.0-1586"]
+                 [io.netty/netty "3.5.3.Final"]
                  [org.webbitserver/webbit "0.4.14"]
                  [org.clojure/data.json  "0.2.2"]
                  [com.novemberain/langohr "1.0.0-beta12"]]
