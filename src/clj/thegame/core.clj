@@ -15,7 +15,7 @@
   [n]
   (format "player.%s" n))
 
-(def world (atom {:snakes '()}))
+(def world (atom {:snakes {}}))
 
 (defn create-handler
   [ws-ch player]
