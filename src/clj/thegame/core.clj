@@ -55,6 +55,7 @@
 
 (defn ws-on_close
   [channel client-count]
+  (delete-player world @client-count)
   (println "closed" channel client-count)
   (swap! client-count dec))
 

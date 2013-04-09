@@ -20,7 +20,12 @@
     (swap! world update-in [:snakes] assoc player snake)
     (println world)
     {:me snake}))
-  
+
+(defn delete-player
+  "Delete a snake from the world"
+  [world player]
+  (swap! world update-in [:snakes] dissoc player))
+
 (defn snake-forward
   "Move the snake forward one cell"
   [snake]
