@@ -15,6 +15,8 @@
   [n]
   (format "player.%s" n))
 
+(def world (atom {:snakes '()}))
+
 (defn create-handler
   [ws-ch player]
   (fn
@@ -22,14 +24,16 @@
     (.send ws-ch (json/write-str {:type "upcase"
                                   :message (format "Player %s Time %s" player
                                                    (String. payload "UTF-8"))}))
+    (tick world)
     (.send ws-ch (json/write-str {:type "refresh"
-                                  :game (new-player)}))))
+                                  :game (see-world world player)}))))
 
 (defn start-consumer
   "Starts a consumer bound to the given topic exchange in a separate thread"
   [ws-ch rch topic-name player]
+  (new-player world @player)
   (.send ws-ch (json/write-str {:type "refresh"
-                                :game (new-player)}))
+                                :game (see-world world @player)}))
   (let [qname (queue-name @player)
         handler (create-handler ws-ch @player)]
     (lq/declare rch qname :exclusive false :auto-delete true)
@@ -77,6 +81,6 @@
     (while true
       (lb/publish channel exchange "" (str (new java.util.Date))
                   :content-type "text/plain" :type "time")
-      (Thread/sleep 2000))
+      (Thread/sleep 500))
     (rmq/close channel)
     (rmq/close conn)))
