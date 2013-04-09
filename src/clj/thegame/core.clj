@@ -24,7 +24,6 @@
     (.send ws-ch (json/write-str {:type "upcase"
                                   :message (format "Player %s Time %s" player
                                                    (String. payload "UTF-8"))}))
-    (tick world)
     (.send ws-ch (json/write-str {:type "refresh"
                                   :game (see-world world player)}))))
 
@@ -80,6 +79,8 @@
     (le/declare channel exchange "fanout" :durable false :auto-delete true)
     (create-websocket channel)
     (while true
+      (tick world)
+      ;; TODO send the world through rabbitMQ
       (lb/publish channel exchange "" (str (new java.util.Date))
                   :content-type "text/plain" :type "time")
       (Thread/sleep 500))
