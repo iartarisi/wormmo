@@ -6,21 +6,29 @@
 (def ^:const directions [">" "<" "^" "v"])
 
 (defn new-player
-  "Find a place for the new snake on the board
-  Return list of the form ([x1 y1] [x2 y2] ... [xn yn])"
+  "Find a place for the new snake on the board"
   [world player]
-  (let [safety 5 ;; don't start the snake with its face in the wall
-        edge (- board-size snake-size safety)
-        start-x (rand-int edge)
-        start-y (rand-int edge)
-        snake {:cells (map vector
-                           (repeat snake-size start-x)
-                           (range (+ start-y snake-size) start-y -1))
+  (let [safety (inc snake-size) ;; make sure we don't init out of bounds
+        start-x (+ (rand-int (- board-size safety)) safety)
+        start-y (+ (rand-int (- board-size safety)) safety)
+        direction (rand-nth directions)
+        snake {:cells
+               (case direction
+                 "^" (map vector
+                          (repeat snake-size start-x)
+                          (range (inc  start-y) (+ start-y snake-size 1)))
+                 ">" (map vector
+                          (range (- start-x snake-size) start-x)
+                          (repeat snake-size start-y))
+                 "v" (map vector
+                          (repeat snake-size start-x)
+                          (range (- start-y snake-size) start-y))
+                 "<" (map vector
+                          (range (inc start-x) (+ start-x snake-size 1))
+                          (repeat snake-size start-y)))
                :head [start-x start-y]
-               :direction "^"}]
-    (swap! world update-in [:snakes] assoc player snake)
-    (println world)
-    {:me snake}))
+               :direction direction}]
+    (swap! world update-in [:snakes] assoc player snake)))
 
 (defn delete-player
   "Delete a snake from the world"
@@ -30,10 +38,20 @@
 (defn cell-forward
   "Move a cell one step forward"
   [[x y] direction]
-  (case direction
-    "^" (if (= y 0)
-          [x (dec board-size)]
-          [x (dec y)])))
+  (let [edge (dec board-size)]
+    (case direction
+      "^" (if (= y 0)
+            [x edge]
+            [x (dec y)])
+      ">" (if (= x edge)
+            [0 y]
+            [(inc x) y])
+      "v" (if (= y edge)
+            [x 0]
+            [x (inc y)])
+      "<" (if (= x 0)
+            [edge y]
+            [(dec x) y]))))
 
 (defn snake-forward
   "Move the snake forward one cell"
