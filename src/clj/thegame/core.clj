@@ -9,30 +9,37 @@
             [langohr.basic :as lb])
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
-  (:use [thegame.snake]))
+  (:use [flatland.protobuf.core]
+        [thegame.snake]))
 
 (defn queue-name
   [n]
   (format "player.%s" n))
 
+(import Game$World)
+(def World (protodef Game$World))
 (def world (atom {:snakes {}}))
 
 (defn create-handler
   [ws-ch player]
   (fn
     [rch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
-    (.send ws-ch (json/write-str {:type "upcase"
-                                  :message (format "Player %s Time %s" player
-                                                   (String. payload "UTF-8"))}))
-    (.send ws-ch (json/write-str {:type "refresh"
-                                  :game (see-world world player)}))))
+    (case type
+      "time" (.send ws-ch (json/write-str
+                           {:type "upcase"
+                            :message (format "Player %s Time %s" player
+                                             (String. payload "UTF-8"))}))
+      "world" (let [world (protobuf-load World payload)]
+                (.send ws-ch (json/write-str
+                              {:type "refresh"
+                               :game (see-world world player)}))))))
 
 (defn start-consumer
   "Starts a consumer bound to the given topic exchange in a separate thread"
   [ws-ch rch topic-name player]
   (new-player world @player)
   (.send ws-ch (json/write-str {:type "refresh"
-                                :game (see-world world @player)}))
+                                :game (see-world @world @player)}))
   (let [qname (queue-name @player)
         handler (create-handler ws-ch @player)]
     (lq/declare rch qname :exclusive false :auto-delete true)
@@ -81,9 +88,10 @@
     (create-websocket channel)
     (while true
       (tick world)
-      ;; TODO send the world through rabbitMQ
       (lb/publish channel exchange "" (str (new java.util.Date))
                   :content-type "text/plain" :type "time")
+      (lb/publish channel exchange "" (protobuf-dump (protobuf World @world))
+                  :content-type "application/octet-stream" :type "world")
       (Thread/sleep 500))
     (rmq/close channel)
     (rmq/close conn)))
