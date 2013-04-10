@@ -10,7 +10,7 @@
                                 (getContext "2d"))})
 
 (defn draw-cell
-  [board fill-color border-color [x y]]
+  [board fill-color border-color {:strs [x y]}]
   (doto (board :context)
     (#(set! (. % -fillStyle) fill-color))
     (.fillRect (* x cell-width) (* y cell-width) cell-width cell-width)

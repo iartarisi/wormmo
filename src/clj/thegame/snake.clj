@@ -3,7 +3,7 @@
 ;; these constants are given in cells
 (def ^:const snake-size 5)
 (def ^:const board-size 40)
-(def ^:const directions [">" "<" "^" "v"])
+(def ^:const directions [:up :down :left :right])
 
 (defn new-player
   "Find a place for the new snake on the board"
@@ -14,19 +14,19 @@
         direction (rand-nth directions)
         snake {:cells
                (case direction
-                 "^" (map vector
-                          (repeat snake-size start-x)
-                          (range (inc  start-y) (+ start-y snake-size 1)))
-                 ">" (map vector
-                          (range (- start-x snake-size) start-x)
-                          (repeat snake-size start-y))
-                 "v" (map vector
-                          (repeat snake-size start-x)
-                          (range (- start-y snake-size) start-y))
-                 "<" (map vector
-                          (range (inc start-x) (+ start-x snake-size 1))
-                          (repeat snake-size start-y)))
-               :head [start-x start-y]
+                 :up (map hash-map
+                          (repeat :x) (repeat snake-size start-x)
+                          (repeat :y) (range (inc start-y) (+ start-y snake-size 1)))
+                 :right (map hash-map
+                             (repeat :x) (range (- start-x snake-size) start-x)
+                             (repeat :y) (repeat snake-size start-y))
+                 :down (map hash-map
+                            (repeat :x) (repeat snake-size start-x)
+                            (repeat :y) (range (- start-y snake-size) start-y))
+                 :left (map hash-map
+                            (repeat :x) (range (inc start-x) (+ start-x snake-size 1))
+                            (repeat :y) (repeat snake-size start-y)))
+               :head {:x start-x :y start-y}
                :direction direction}]
     (swap! world update-in [:snakes] assoc player snake)))
 
@@ -37,21 +37,22 @@
 
 (defn cell-forward
   "Move a cell one step forward"
-  [[x y] direction]
+  [{:keys [x y]} direction]
   (let [edge (dec board-size)]
-    (case direction
-      "^" (if (= y 0)
-            [x edge]
-            [x (dec y)])
-      ">" (if (= x edge)
-            [0 y]
-            [(inc x) y])
-      "v" (if (= y edge)
-            [x 0]
-            [x (inc y)])
-      "<" (if (= x 0)
-            [edge y]
-            [(dec x) y]))))
+    (zipmap [:x :y]
+            (case direction
+              :up (if (= y 0)
+                    [x edge]
+                    [x (dec y)])
+              :right (if (= x edge)
+                       [0 y]
+                       [(inc x) y])
+              :down (if (= y edge)
+                      [x 0]
+                      [x (inc y)])
+              :left (if (= x 0)
+                      [edge y]
+                      [(dec x) y])))))
 
 (defn snake-forward
   "Move the snake forward one cell"
