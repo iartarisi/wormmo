@@ -38,7 +38,10 @@
 (defn conn-id [conn] (System/identityHashCode conn))
 
 (defn ws-on_message
-  [conn message])
+  [conn message]
+  (let [mess (json/read-str message)]
+    (case (mess "type")
+      "turn" (println (mess "data")))))
 
 (defn ws-on_open
   [conn rchan]

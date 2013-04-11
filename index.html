@@ -10,15 +10,32 @@
     <script src="http://jquery-websocket.googlecode.com/files/jquery.websocket-0.0.1.js">
     </script>
     <script>
+      var direction;
+
       var ws = $.websocket("ws://127.0.0.1:8080/websocket", {
-      events: {
-      refresh: function(e) { snake.refresh(e.game); },
-      upcase: function(e) { $("#content").html(e.message); }}});
+          events: {
+              refresh: function(e) {
+                  direction = e.game["me"]["direction"];
+                  snake.refresh(e.game); },
+              upcase: function(e) { $("#content").html(e.message); }
+          }
+      });
 
       $('#message').change(function(){
-      ws.send('message', {type: "downcase", message: $("#message").val()});});
+          ws.send('message',
+                  {type: "downcase", message: $("#message").val()});
+      });
+
+      $(document).keydown(function(e) {
+          var key = e.which;
+          if (key == "37" && direction != "right") direction = "left";
+          else if (key == "38" && direction != "down") direction = "up";
+          else if (key == "39" && direction != "left") direction = "right";
+          else if (key == "40" && direction != "up") direction = "down";
+          ws.send('turn', direction);
+      })
     </script>
-    <canvas id="canvas" width="450" height="450"></canvas>
+    <canvas id="canvas" width="450" height="450" tabindex="1"></canvas>
     <script src="/snake.js"></script>
   </body>
 </html>
