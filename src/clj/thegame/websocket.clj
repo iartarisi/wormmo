@@ -6,7 +6,7 @@
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
   (:use [thegame.serializer :only [deserialize]]
-        [thegame.snake]))
+        [thegame.snake :only [see-world]]))
 
 
 (defn queue-name [n] (format "player.%s" n))
@@ -49,10 +49,11 @@
     (println "opened" conn cid)))
 
 (defn ws-on_close
-  [conn]
+  [conn rchan]
   (let [cid (conn-id conn)]
-    ;; TODO this should be a call via rabbitmq to the server
-    ;; (delete-player world @client-count)
+    (lq/delete rchan (queue-name cid))
+    (lb/publish rchan "" "server" (str cid)
+                :content-type "text/plain" :type "player-quit")
     (println "closed" conn cid)))
 
 (defn create-websocket
@@ -62,7 +63,7 @@
     (.add "/websocket"
           (proxy [WebSocketHandler] []
             (onOpen [c] (ws-on_open c rchan))
-            (onClose [c] (ws-on_close c))
+            (onClose [c] (ws-on_close c rchan))
             (onMessage [c j] (ws-on_message c j))))
     (.add (StaticFileHandler. "."))
     (.start)))

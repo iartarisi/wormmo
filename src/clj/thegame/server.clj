@@ -8,7 +8,7 @@
             [langohr.basic :as lb])
   (:use [thegame.serializer :only [serialize]]
         [thegame.websocket :only [create-websocket]]
-        [thegame.snake :only [tick new-player]]))
+        [thegame.snake :only [tick new-player delete-player]]))
 
 (def world (atom {:snakes {}}))
 
@@ -16,7 +16,8 @@
   [ch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
   (println (format "Received: %s" (String. payload "UTF-8")))
   (case type
-    "new-player" (new-player world (Integer. (String. payload "UTF-8")))))
+    "new-player" (new-player world (Integer. (String. payload "UTF-8")))
+    "player-quit" (delete-player world (Integer. (String. payload "UTF-8")))))
 
 (defn -main
   [& args]
@@ -28,7 +29,7 @@
     (.start (Thread.
              #(lc/subscribe channel "server" server-handler :auto-ack true)))
 
-    (le/declare channel worldex "fanout" :durable false :auto-delete true)
+    (le/declare channel worldex "fanout" :durable false :auto-delete false)
     (create-websocket channel)
     (while true
       (tick world)
