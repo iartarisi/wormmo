@@ -5,7 +5,7 @@
             [langohr.basic :as lb])
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
-  (:use [thegame.serializer :only [deserialize]]
+  (:use [thegame.serializer :only [serialize deserialize World Turn]]
         [thegame.snake :only [see-world]]))
 
 
@@ -20,7 +20,7 @@
                            {:type "upcase"
                             :message (format "Player %s Time %s" player
                                              (String. payload "UTF-8"))}))
-      "world" (let [world (deserialize payload)]
+      "world" (let [world (deserialize World payload)]
                 (.send ws-ch (json/write-str
                               {:type "refresh"
                                :game (see-world world player)}))))))
@@ -42,11 +42,19 @@
   [rchan type data]
   (lb/publish rchan "" "server" data :content-type "text/plain" :type type))
 
+(defn server-binary
+  [rchan type data]
+  (lb/publish rchan "" "server" data
+              :content-type "application/octet-stream" :type type))
+
 (defn ws-on_message
-  [conn message]
-  (let [mess (json/read-str message)]
+  [conn message rchan]
+  (let [cid (conn-id conn)
+        mess (json/read-str message)]
     (case (mess "type")
-      "turn" (println (mess "data")))))
+      "turn" (server-binary
+              rchan "turn" (serialize Turn {:player cid
+                                            :direction (mess "data")})))))
 
 (defn ws-on_open
   [conn rchan]
@@ -70,6 +78,6 @@
           (proxy [WebSocketHandler] []
             (onOpen [c] (ws-on_open c rchan))
             (onClose [c] (ws-on_close c rchan))
-            (onMessage [c j] (ws-on_message c j))))
+            (onMessage [c j] (ws-on_message c j rchan))))
     (.add (StaticFileHandler. "."))
     (.start)))

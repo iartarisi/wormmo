@@ -27,8 +27,10 @@
                             (repeat :x) (range (inc start-x) (+ start-x snake-size 1))
                             (repeat :y) (repeat snake-size start-y)))
                :head {:x start-x :y start-y}
-               :direction direction}]
-    (swap! world update-in [:snakes] assoc player snake)))
+               :direction direction
+               :turn direction}]
+    (swap! world update-in [:snakes] assoc player snake)
+    (println (format "New player %s." player))))
 
 (defn delete-player
   "Delete a snake from the world"
@@ -58,22 +60,22 @@
   "Move the snake forward one cell"
   [snake]
   {:cells (map #(cell-forward % (snake :direction)) (snake :cells))
-   :head (cell-forward (snake :head) (snake :direction))
-   :direction (snake :direction)})
+   :head (cell-forward (snake :head) (snake :turn))
+   :direction (snake :direction)
+   :turn (snake :turn)})
 
 (defn tick
   "Make one iteration in the world"
   [world]
-  (println "tick: " world)
   (doseq [p (keys (@world :snakes))]
-    (swap! world update-in [:snakes p] snake-forward))
-  (println "after tick: " world)
-  )
+    (swap! world update-in [:snakes p] snake-forward)))
+
+(defn turn
+  [world player whence]
+  (swap! world assoc-in [:snakes player :turn] whence))
 
 (defn see-world
   "Get the world as it's seen by a player"
   [world player]
-  (let [w {:me ((world :snakes) player)
-           :others (dissoc (world :snakes) player)}]
-    (println w)
-    w))
+  {:me ((world :snakes) player)
+   :others (dissoc (world :snakes) player)})

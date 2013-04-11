@@ -32,6 +32,9 @@
           else if (key == "38" && direction != "down") direction = "up";
           else if (key == "39" && direction != "left") direction = "right";
           else if (key == "40" && direction != "up") direction = "down";
+          // todo: only trigger this if the direction has changed,
+          // otherwise we can overload the server
+          // todo: maybe also check that on the server
           ws.send('turn', direction);
       })
     </script>

@@ -15,13 +15,16 @@ message World {
         required int32 y = 2;
     }
 
-    enum Direction {
-        up = 0;
-        down = 1;
-        left = 2;
-        right = 3;
-    }
 }
 
-    
-  
+message Turn {
+    required int32 player = 1;
+    required Direction direction = 2;
+}
+
+enum Direction {
+    up = 0;
+    down = 1;
+    left = 2;
+    right = 3;
+}

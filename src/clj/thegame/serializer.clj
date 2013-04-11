@@ -2,12 +2,15 @@
   (:use [flatland.protobuf.core]))
 
 (import Game$World)
+(import Game$Turn)
+
 (def World (protodef Game$World))
+(def Turn (protodef Game$Turn))
 
 (defn serialize
-  [world]
-  (protobuf-dump (protobuf World world)))
+  [type data]
+  (protobuf-dump (protobuf type data)))
 
 (defn deserialize
-  [world]
-  (protobuf-load World world))
+  [type data]
+  (protobuf-load type data))
