@@ -1,20 +1,14 @@
-(ns thegame.core
-  (:gen-class)
+(ns thegame.websocket
   (:require [clojure.data.json :as json]
-            [langohr.core :as rmq]
-            [langohr.channel :as lch]
             [langohr.queue :as lq]
-            [langohr.exchange :as le]
-            [langohr.consumers :as lc]
-            [langohr.basic :as lb])
+            [langohr.consumers :as lc])
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
   (:use [flatland.protobuf.core]
         [thegame.snake]))
 
-(defn queue-name
-  [n]
-  (format "player.%s" n))
+
+(defn queue-name [n] (format "player.%s" n))
 
 (import Game$World)
 (def World (protodef Game$World))
@@ -62,7 +56,7 @@
 (defn ws-on_close
   [channel client-count]
   ;; TODO this should be a call via rabbitmq to the server
-  (delete-player world @client-count)
+  ;; (delete-player world @client-count)
   (println "closed" channel client-count)
   (swap! client-count dec))
 
@@ -78,20 +72,3 @@
             (onMessage [c j] (ws-on_message c j client-count))))
     (.add (StaticFileHandler. "."))
     (.start)))
-
-(defn -main
-  [& args]
-  (let [conn (rmq/connect)
-        channel (lch/open conn)
-        exchange "games"]
-    (le/declare channel exchange "fanout" :durable false :auto-delete true)
-    (create-websocket channel)
-    (while true
-      (tick world)
-      (lb/publish channel exchange "" (str (new java.util.Date))
-                  :content-type "text/plain" :type "time")
-      (lb/publish channel exchange "" (protobuf-dump (protobuf World @world))
-                  :content-type "application/octet-stream" :type "world")
-      (Thread/sleep 500))
-    (rmq/close channel)
-    (rmq/close conn)))

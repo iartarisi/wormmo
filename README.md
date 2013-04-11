@@ -1,10 +1,10 @@
-# thegame
+# wormmo
 
-A Clojure library designed to ... well, that part is up to you.
+Massively Multiplayer Online Snake game.
 
 ## How it works
 
-WebSocket
+WebSockets, RabbitMQ, protobuf
 
 ## License
 

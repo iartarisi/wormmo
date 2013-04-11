@@ -18,4 +18,4 @@
                 :compiler {:output-to "snake.js"
                            :optimizations :whitespace
                            :pretty-print true}}]}
-  :main thegame.core)
+  :main thegame.server)
