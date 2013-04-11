@@ -37,6 +37,11 @@
 
 (defn conn-id [conn] (System/identityHashCode conn))
 
+(defn server-talk
+  "Simple plain-text rabbitmq server communication"
+  [rchan type data]
+  (lb/publish rchan "" "server" data :content-type "text/plain" :type type))
+
 (defn ws-on_message
   [conn message]
   (let [mess (json/read-str message)]
@@ -46,8 +51,7 @@
 (defn ws-on_open
   [conn rchan]
   (let [cid (conn-id conn)]
-    (lb/publish rchan "" "server" (str cid)
-                :content-type "text/plain" :type "new-player")
+    (server-talk rchan "new-player" (str cid))
     (start-consumer conn rchan "world" cid)
     (println "opened" conn cid)))
 
@@ -55,8 +59,7 @@
   [conn rchan]
   (let [cid (conn-id conn)]
     (lq/delete rchan (queue-name cid))
-    (lb/publish rchan "" "server" (str cid)
-                :content-type "text/plain" :type "player-quit")
+    (server-talk rchan "player-quit" (str cid))
     (println "closed" conn cid)))
 
 (defn create-websocket
