@@ -4,14 +4,12 @@
             [langohr.consumers :as lc])
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
-  (:use [flatland.protobuf.core]
+  (:use [thegame.serializer :only [deserialize]]
         [thegame.snake]))
 
 
 (defn queue-name [n] (format "player.%s" n))
 
-(import Game$World)
-(def World (protodef Game$World))
 (def world (atom {:snakes {}}))
 
 (defn create-handler
@@ -23,7 +21,7 @@
                            {:type "upcase"
                             :message (format "Player %s Time %s" player
                                              (String. payload "UTF-8"))}))
-      "world" (let [world (protobuf-load World payload)]
+      "world" (let [world (deserialize payload)]
                 (.send ws-ch (json/write-str
                               {:type "refresh"
                                :game (see-world world player)}))))))
