@@ -28,43 +28,41 @@
 (defn start-consumer
   "Starts a consumer bound to the given topic exchange in a separate thread"
   [ws-ch rch topic-name player]
-  (let [qname (queue-name @player)
-        handler (create-handler ws-ch @player)]
+  (let [qname (queue-name player)
+        handler (create-handler ws-ch player)]
     (lq/declare rch qname :exclusive false :auto-delete true)
     (lq/bind rch qname topic-name)
     (.start (Thread. #(lc/subscribe rch qname handler :auto-ack true)))))
 
+
+(defn conn-id [conn] (System/identityHashCode conn))
+
 (defn ws-on_message
-  [channel message client-count]
-  (do
-    (println channel message)
-    (.send channel (format "{\"type\": \"upcase\",
-                             \"message\": \"caca %s\"}" @client-count))))
+  [conn message])
 
 (defn ws-on_open
-  [channel client-count rchan]
-  (swap! client-count inc)
-  (lb/publish rchan "" "server" (str @client-count)
-              :content-type "text/plain" :type "new-player")
-  (start-consumer channel rchan "world" client-count)
-  (println "opened" channel client-count))
+  [conn rchan]
+  (let [cid (conn-id conn)]
+    (lb/publish rchan "" "server" (str cid)
+                :content-type "text/plain" :type "new-player")
+    (start-consumer conn rchan "world" cid)
+    (println "opened" conn cid)))
 
 (defn ws-on_close
-  [channel client-count]
-  ;; TODO this should be a call via rabbitmq to the server
-  ;; (delete-player world @client-count)
-  (println "closed" channel client-count)
-  (swap! client-count dec))
+  [conn]
+  (let [cid (conn-id conn)]
+    ;; TODO this should be a call via rabbitmq to the server
+    ;; (delete-player world @client-count)
+    (println "closed" conn cid)))
 
 (defn create-websocket
   "rchan - a rabbitmq channel to publish to"
   [rchan]
-  (def client-count (atom 0))
   (doto (WebServers/createWebServer 8080)
     (.add "/websocket"
           (proxy [WebSocketHandler] []
-            (onOpen [c] (ws-on_open c client-count rchan))
-            (onClose [c] (ws-on_close c client-count))
-            (onMessage [c j] (ws-on_message c j client-count))))
+            (onOpen [c] (ws-on_open c rchan))
+            (onClose [c] (ws-on_close c))
+            (onMessage [c j] (ws-on_message c j))))
     (.add (StaticFileHandler. "."))
     (.start)))
