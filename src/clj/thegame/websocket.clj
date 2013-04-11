@@ -1,7 +1,8 @@
 (ns thegame.websocket
   (:require [clojure.data.json :as json]
             [langohr.queue :as lq]
-            [langohr.consumers :as lc])
+            [langohr.consumers :as lc]
+            [langohr.basic :as lb])
   (:import [org.webbitserver WebServer WebServers WebSocketHandler]
            [org.webbitserver.handler StaticFileHandler])
   (:use [thegame.serializer :only [deserialize]]
@@ -9,8 +10,6 @@
 
 
 (defn queue-name [n] (format "player.%s" n))
-
-(def world (atom {:snakes {}}))
 
 (defn create-handler
   [ws-ch player]
@@ -29,9 +28,6 @@
 (defn start-consumer
   "Starts a consumer bound to the given topic exchange in a separate thread"
   [ws-ch rch topic-name player]
-  (new-player world @player)
-  (.send ws-ch (json/write-str {:type "refresh"
-                                :game (see-world @world @player)}))
   (let [qname (queue-name @player)
         handler (create-handler ws-ch @player)]
     (lq/declare rch qname :exclusive false :auto-delete true)
@@ -48,7 +44,9 @@
 (defn ws-on_open
   [channel client-count rchan]
   (swap! client-count inc)
-  (start-consumer channel rchan "games" client-count)
+  (lb/publish rchan "" "server" (str @client-count)
+              :content-type "text/plain" :type "new-player")
+  (start-consumer channel rchan "world" client-count)
   (println "opened" channel client-count))
 
 (defn ws-on_close
