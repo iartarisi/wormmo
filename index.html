@@ -1,6 +1,5 @@
 <html>
   <body>
-    <input id="message" type="text" />
     <section id="content">Hello.</section>
     <script src="http://www.google.com/jsapi"></script>
     <script>google.load("jquery", "1.7.1")</script>
@@ -15,15 +14,15 @@
       var ws = $.websocket("ws://127.0.0.1:8080/websocket", {
           events: {
               refresh: function(e) {
-                  direction = e.game["me"]["direction"];
-                  snake.refresh(e.game); },
+                  if (e.game["me"]) {
+                      direction = e.game["me"]["direction"];
+                      snake.refresh(e.game);
+                  } else {
+                      $("#message").html("You died! Refresh to try again.");
+                  }
+              },
               upcase: function(e) { $("#content").html(e.message); }
           }
-      });
-
-      $('#message').change(function(){
-          ws.send('message',
-                  {type: "downcase", message: $("#message").val()});
       });
 
       $(document).keydown(function(e) {
@@ -40,5 +39,6 @@
     </script>
     <canvas id="canvas" width="450" height="450" tabindex="1"></canvas>
     <script src="/snake.js"></script>
+    <div id="message"></div>
   </body>
 </html>

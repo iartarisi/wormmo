@@ -68,11 +68,20 @@
    :direction (snake :turn)
    :turn (snake :turn)})
 
+(defn snake-collision
+  [snake world]
+  ;; TODO: head-on-head collision
+  (let [all-cells (flatten (map :cells (vals (world :snakes))))]
+    (boolean (some #{(snake :head)} all-cells))))
+
 (defn tick
   "Make one iteration in the world"
   [world]
   (doseq [p (keys (@world :snakes))]
-    (swap! world update-in [:snakes p] snake-forward)))
+    (swap! world update-in [:snakes p] snake-forward))
+  (doseq [[player snake] (@world :snakes)]
+    (if (snake-collision snake @world)
+      (delete-player world player))))
 
 (defn turn
   [world player whence]
