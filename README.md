@@ -4,7 +4,13 @@ Massively Multiplayer Online Snake game.
 
 ## How it works
 
-WebSockets, RabbitMQ, protobuf
+Communication between the client and the server is done via WebSocket. WebSocket connections talk to the backend server via RabbitMQ + google protocol buffers. The backend servers does all the computation, the browser just paints the world and sends key events. The web frontend is a mix of javascript and clojurescript (compiled to javascript).
+
+
+## What it looks like
+
+![Screenshot](http://i.imgur.com/kNnp4WQ.png)
+
 
 ## Installation
 
