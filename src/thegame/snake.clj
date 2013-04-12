@@ -74,11 +74,15 @@
   (let [all-cells (flatten (map :cells (vals (world :snakes))))]
     (boolean (some #{(snake :head)} all-cells))))
 
+(defn update-vals
+  [hmap f]
+  (println hmap)
+  (reduce #(update-in % [%2] f) hmap (keys hmap)))
+
 (defn tick
   "Make one iteration in the world"
   [world]
-  (doseq [p (keys (@world :snakes))]
-    (swap! world update-in [:snakes p] snake-forward))
+  (swap! world update-in [:snakes] update-vals snake-forward)
   (doseq [[player snake] (@world :snakes)]
     (if (snake-collision snake @world)
       (delete-player world player))))
