@@ -22,6 +22,10 @@ lein run
 Wait a little until leiningen downloads and installs all the dependencies. Then point your browser and your friends' browsers to `http://localhost:8080` and play.
 
 
+## Bugs
+
+One of the dependencies (netty) currently has trouble with Chromium. The project has only been tested on Firefox.
+
 ## License
 
 Copyright © 2013 FIXME
