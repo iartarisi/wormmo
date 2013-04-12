@@ -5,6 +5,23 @@
 (def ^:const board-size 40)
 (def ^:const directions [:up :down :left :right])
 
+(defn build-snake
+  [snake-size start-x start-y direction]
+  (case direction
+    :up (map hash-map
+             (repeat :x) (repeat snake-size start-x)
+             (repeat :y) (range (inc start-y) (+ start-y snake-size 1)))
+    :right (map hash-map
+                (repeat :x) (range (- start-x snake-size) start-x)
+                (repeat :y) (repeat snake-size start-y))
+    :down (map hash-map
+               (repeat :x) (repeat snake-size start-x)
+               (repeat :y) (range (- start-y snake-size) start-y))
+    :left (map hash-map
+               (repeat :x) (range (inc start-x) (+ start-x snake-size 1))
+               (repeat :y) (repeat snake-size start-y)))
+  )
+
 (defn new-player
   "Find a place for the new snake on the board"
   [world player]
@@ -12,20 +29,7 @@
         start-x (+ (rand-int (- board-size safety)) safety)
         start-y (+ (rand-int (- board-size safety)) safety)
         direction (rand-nth directions)
-        snake {:cells
-               (case direction
-                 :up (map hash-map
-                          (repeat :x) (repeat snake-size start-x)
-                          (repeat :y) (range (inc start-y) (+ start-y snake-size 1)))
-                 :right (map hash-map
-                             (repeat :x) (range (- start-x snake-size) start-x)
-                             (repeat :y) (repeat snake-size start-y))
-                 :down (map hash-map
-                            (repeat :x) (repeat snake-size start-x)
-                            (repeat :y) (range (- start-y snake-size) start-y))
-                 :left (map hash-map
-                            (repeat :x) (range (inc start-x) (+ start-x snake-size 1))
-                            (repeat :y) (repeat snake-size start-y)))
+        snake {:cells (build-snake snake-size start-x start-y direction)
                :head {:x start-x :y start-y}
                :direction direction
                :turn direction}]
