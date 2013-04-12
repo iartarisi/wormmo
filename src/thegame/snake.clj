@@ -89,7 +89,8 @@
 
 (defn turn
   [world player whence]
-  (swap! world assoc-in [:snakes player :turn] whence))
+  (if (get-in @world [:snakes player])
+    (swap! world assoc-in [:snakes player :turn] whence)))
 
 (defn see-world
   "Get the world as it's seen by a player"

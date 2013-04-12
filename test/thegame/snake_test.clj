@@ -116,5 +116,24 @@
            {:snakes {1 {:cells '({:x 3 :y 2} {:x 4 :y 2})
                         :head {:x 5 :y 2}
                         :turn :right
-                        :direction :right}
-                     }}))))
+                        :direction :right}}}))))
+
+(deftest turn-snake-test
+  (let [player 1
+        world (atom {:snakes {player {:cells '({:x 2 :y 2})
+                                      :head {:x 2 :y 3}
+                                      :direction :down
+                                      :turn :down}}})]
+    (turn world player :up)
+    (is (= (get-in @world [:snakes player])
+           {:cells '({:x 2 :y 2})
+            :head {:x 2 :y 3}
+            :direction :down
+            :turn :up}))))
+
+(deftest turn-snake-no-snake-test
+  (let [player 1
+        world (atom {:snakes {}})]
+    (turn world player :up)
+    (is (= @world
+           {:snakes {}}))))
