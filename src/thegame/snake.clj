@@ -35,17 +35,19 @@
     (swap! world update-in [:snakes] assoc player snake)
     (println (format "New player %s." player))))
 
-
 (defn grow-food
-  [world]
-  (let [x (rand-int board-size)
-        y (rand-int board-size)]
-    (swap! world update-in [:food] conj {:x x :y y})))
+  []
+  {:x (rand-int board-size)
+   :y (rand-int board-size)})
 
 (defn delete-player
   "Delete a snake from the world"
   [world player]
   (swap! world update-in [:snakes] dissoc player))
+
+(defn eat-food
+  [food cell]
+  (conj (disj food cell) (grow-food)))
 
 (defn cell-forward
   "Move a cell one step forward"
@@ -66,26 +68,21 @@
                       [edge y]
                       [(dec x) y])))))
 
-(defn snake-eat?
-  [head world]
-  (if (contains? (@world :food) head)
-    (do ;; (swap! world update-in [:food] disj head)
-        ;; (grow-food world)
-        true)))
-
 (defn snake-forward
-  "Move the snake forward one cell"
-  [snake world]
-  (let [new-head (cell-forward (snake :head) (snake :turn))]
-    {:cells (conj (vec (if (snake-eat? new-head world)
-                         (do (println (snake :cells)) (snake :cells))
-                         (rest (snake :cells))))
-                  (snake :head))
-     :head new-head
-     :direction (snake :turn)
-     :turn (snake :turn)}))
+  "Move the snake forward one cell. Return a food set and a snake hash."
+  [food snake]
+  (let [new-head (cell-forward (snake :head) (snake :turn))
+        eat? (contains? food new-head)]
+    [(if eat? (eat-food food new-head) food)
+     {:cells (conj (vec (if eat?
+                          (snake :cells)
+                          (rest (snake :cells))))
+                   (snake :head))
+      :head new-head
+      :direction (snake :turn)
+      :turn (snake :turn)}]))
 
-(defn snake-collision
+(defn collision?
   [snake world]
   ;; TODO: head-on-head collision
   (let [all-cells (flatten (map :cells (vals (world :snakes))))]
@@ -98,10 +95,12 @@
 (defn tick
   "Make one iteration in the world"
   [world]
-  (swap! world update-in [:snakes] update-vals #(snake-forward % world))
-  (doseq [[player snake] (@world :snakes)]
-    (if (snake-collision snake @world)
-      (delete-player world player))))
+  (let [[snakes food] (reduce (fn [[snakes food] [player snake]]
+                                (let [[food snake] (snake-forward food snake)]
+                                  [(conj snakes [player snake]) food]))
+                              [{} (world :food)] (world :snakes))
+        snakes (into {} (remove (fn [[player snake]] (collision? snake world)) snakes))]
+    {:snakes snakes :food food}))
 
 (defn turn
   [world player whence]

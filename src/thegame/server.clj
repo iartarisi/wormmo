@@ -33,7 +33,7 @@
     (le/declare channel worldex "fanout" :durable false :auto-delete false)
     (create-websocket channel)
     (while true
-      (tick world)
+      (swap! world tick)
       (lb/publish channel worldex "" (str (new java.util.Date))
                   :content-type "text/plain" :type "time")
       (lb/publish channel worldex "" (serialize World @world)
