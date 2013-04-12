@@ -19,8 +19,7 @@
                (repeat :y) (range (- start-y snake-size) start-y))
     :left (map hash-map
                (repeat :x) (range (inc start-x) (+ start-x snake-size 1))
-               (repeat :y) (repeat snake-size start-y)))
-  )
+               (repeat :y) (repeat snake-size start-y))))
 
 (defn new-player
   "Find a place for the new snake on the board"
@@ -76,7 +75,6 @@
 
 (defn update-vals
   [hmap f]
-  (println hmap)
   (reduce #(update-in % [%2] f) hmap (keys hmap)))
 
 (defn tick
