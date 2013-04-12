@@ -63,9 +63,9 @@
 (defn snake-forward
   "Move the snake forward one cell"
   [snake]
-  {:cells (map #(cell-forward % (snake :direction)) (snake :cells))
+  {:cells (lazy-seq (conj (vec (rest (snake :cells))) (snake :head)))
    :head (cell-forward (snake :head) (snake :turn))
-   :direction (snake :direction)
+   :direction (snake :turn)
    :turn (snake :turn)})
 
 (defn tick

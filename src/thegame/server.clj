@@ -38,6 +38,6 @@
                   :content-type "text/plain" :type "time")
       (lb/publish channel worldex "" (serialize World @world)
                   :content-type "application/octet-stream" :type "world")
-      (Thread/sleep 500))
+      (Thread/sleep 100))
     (rmq/close channel)
     (rmq/close conn)))
