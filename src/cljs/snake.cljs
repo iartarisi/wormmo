@@ -31,11 +31,17 @@
     (#(set! (. % -strokeStyle) "black"))
     (.strokeRect 0 0 (board :size) (board :size))))
 
+(defn draw-food
+  [cell]
+  (draw-cell board "yellow" "gold" cell))
+
 (defn refresh
   [game-hash]
   (draw-board board)
   (let [world (js->clj game-hash)]
     (draw-snake (world "me") "green")
     (doseq [s (vals (world "others"))]
-      (draw-snake s "red"))))
+      (draw-snake s "red"))
+    (doseq [f (world "food")]
+      (draw-food f))))
     ;; (map #(draw-snake % "red") (vals (world "others")))))

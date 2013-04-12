@@ -35,6 +35,13 @@
     (swap! world update-in [:snakes] assoc player snake)
     (println (format "New player %s." player))))
 
+
+(defn grow-food
+  [world]
+  (let [x (rand-int board-size)
+        y (rand-int board-size)]
+    (swap! world update-in [:food] conj {:x x :y y})))
+
 (defn delete-player
   "Delete a snake from the world"
   [world player]
@@ -59,13 +66,24 @@
                       [edge y]
                       [(dec x) y])))))
 
+(defn snake-eat?
+  [head world]
+  (if (contains? (@world :food) head)
+    (do ;; (swap! world update-in [:food] disj head)
+        ;; (grow-food world)
+        true)))
+
 (defn snake-forward
   "Move the snake forward one cell"
-  [snake]
-  {:cells (lazy-seq (conj (vec (rest (snake :cells))) (snake :head)))
-   :head (cell-forward (snake :head) (snake :turn))
-   :direction (snake :turn)
-   :turn (snake :turn)})
+  [snake world]
+  (let [new-head (cell-forward (snake :head) (snake :turn))]
+    {:cells (conj (vec (if (snake-eat? new-head world)
+                         (do (println (snake :cells)) (snake :cells))
+                         (rest (snake :cells))))
+                  (snake :head))
+     :head new-head
+     :direction (snake :turn)
+     :turn (snake :turn)}))
 
 (defn snake-collision
   [snake world]
@@ -80,7 +98,7 @@
 (defn tick
   "Make one iteration in the world"
   [world]
-  (swap! world update-in [:snakes] update-vals snake-forward)
+  (swap! world update-in [:snakes] update-vals #(snake-forward % world))
   (doseq [[player snake] (@world :snakes)]
     (if (snake-collision snake @world)
       (delete-player world player))))
@@ -94,4 +112,5 @@
   "Get the world as it's seen by a player"
   [world player]
   {:me ((world :snakes) player)
-   :others (dissoc (world :snakes) player)})
+   :others (dissoc (world :snakes) player)
+   :food (world :food)})

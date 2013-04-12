@@ -2,6 +2,12 @@ import "extensions.proto";
 message World {
     // required SnakeAttr s = 1;
     repeated Snake snakes = 1 [(map_by) = "key"];
+    repeated Food food = 2 [(set) = true];
+
+    message Food {
+        required Cell item = 1;
+        required bool exists = 2;
+    }
 
     message Snake {
         required int32 key = 1;

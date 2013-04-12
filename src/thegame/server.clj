@@ -10,7 +10,7 @@
         [thegame.websocket :only [create-websocket]]
         [thegame.snake :only [tick turn new-player delete-player]]))
 
-(def world (atom {:snakes {}}))
+(def world (atom {:snakes {} :food #{{:x 3 :y 5}}}))
 
 (defn server-handler
   [ch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
@@ -26,7 +26,7 @@
         channel (lch/open conn)
         worldex "world"]
 
-    (lq/declare channel "server" :exclusive false :auto-delete true)
+    (lq/declare channel "server" :exclusive false :auto-delete false)
     (.start (Thread.
              #(lc/subscribe channel "server" server-handler :auto-ack true)))
 

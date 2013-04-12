@@ -30,7 +30,7 @@
   [ws-ch rch topic-name player]
   (let [qname (queue-name player)
         handler (create-handler ws-ch player)]
-    (lq/declare rch qname :exclusive false :auto-delete true)
+    (lq/declare rch qname :exclusive false :auto-delete false)
     (lq/bind rch qname topic-name)
     (.start (Thread. #(lc/subscribe rch qname handler :auto-ack true)))))
 

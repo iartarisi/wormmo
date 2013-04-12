@@ -7,44 +7,52 @@
          {:x 0 :y 1})))
 
 (deftest snake-forward-straight-test
-  (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
-                         :head {:x 3 :y 1}
-                         :direction :right
-                         :turn :right})
-         {:cells '({:x 1 :y 1} {:x 2 :y 1} {:x 3 :y 1})
-          :head {:x 4 :y 1}
-          :direction :right
-          :turn :right})))
+  (let [world (atom {:snakes {}})]
+    (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
+                           :head {:x 3 :y 1}
+                           :direction :right
+                           :turn :right}
+                          world)
+           {:cells '({:x 1 :y 1} {:x 2 :y 1} {:x 3 :y 1})
+            :head {:x 4 :y 1}
+            :direction :right
+            :turn :right}))))
 
 (deftest snake-forward-head-off
-  (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
-                         :head {:x 2 :y 2}
-                         :direction :down
-                         :turn :down})
-         {:cells [{:x 1 :y 1} {:x 2 :y 1} {:x 2 :y 2}]
-          :head {:x 2 :y 3}
-          :direction :down
-          :turn :down})))
+  (let [world (atom {:snakes {}})]
+    (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
+                           :head {:x 2 :y 2}
+                           :direction :down
+                           :turn :down}
+                          world)
+           {:cells [{:x 1 :y 1} {:x 2 :y 1} {:x 2 :y 2}]
+            :head {:x 2 :y 3}
+            :direction :down
+            :turn :down}))))
 
 (deftest snake-forward-cell-off
-  (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 1 :y 2})
-                         :head {:x 2 :y 2}
-                         :direction :right
-                         :turn :right})
-         {:cells '({:x 1 :y 1} {:x 1 :y 2} {:x 2 :y 2})
-          :head {:x 3 :y 2}
-          :direction :right
-          :turn :right})))
+  (let [world (atom {:snakes {}})]
+    (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 1 :y 2})
+                           :head {:x 2 :y 2}
+                           :direction :right
+                           :turn :right}
+                          world)
+           {:cells '({:x 1 :y 1} {:x 1 :y 2} {:x 2 :y 2})
+            :head {:x 3 :y 2}
+            :direction :right
+            :turn :right}))))
 
 (deftest snake-forward-turn
-  (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
-                         :head {:x 2 :y 2}
-                         :direction :down
-                         :turn :right})
-         {:cells '({:x 1 :y 1} {:x 2 :y 1} {:x 2 :y 2})
-          :head {:x 3 :y 2}
-          :direction :right
-          :turn :right})))
+  (let [world (atom {:snakes {}})]
+    (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
+                           :head {:x 2 :y 2}
+                           :direction :down
+                           :turn :right}
+                          world)
+           {:cells '({:x 1 :y 1} {:x 2 :y 1} {:x 2 :y 2})
+            :head {:x 3 :y 2}
+            :direction :right
+            :turn :right}))))
 
 (deftest new-player-test
   (let [world (atom {:snakes {}})
@@ -137,3 +145,21 @@
     (turn world player :up)
     (is (= @world
            {:snakes {}}))))
+
+(deftest snake-forward-food-test
+  (let [world (atom {:snakes {} :food #{{:x 4 :y 1}}})]
+    (is (= (snake-forward {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1})
+                           :head {:x 3 :y 1}
+                           :direction :right
+                           :turn :right}
+                          world)
+           {:cells '({:x 0 :y 1} {:x 1 :y 1} {:x 2 :y 1} {:x 3 :y 1})
+            :head {:x 4 :y 1}
+            :direction :right
+            :turn :right}))))
+
+(deftest grow-food-test
+  (let [world (atom {:food #{}})]
+    (grow-food world)
+    (is (= 1
+           (count (@world :food))))))
