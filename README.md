@@ -1,5 +1,7 @@
 # wormmo
 
+[![Build Status](https://travis-ci.org/mapleoin/wormmo.png)](https://travis-ci.org/mapleoin/wormmo)
+
 Massively Multiplayer Online Snake game.
 
 ## How it works
