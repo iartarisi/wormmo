@@ -18,6 +18,7 @@
                       direction = e.game["me"]["direction"];
                       snake.refresh(e.game);
                   } else {
+                      this.close();
                       $("#message").html("You died! Refresh to try again.");
                   }
               },
