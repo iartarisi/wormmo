@@ -2,12 +2,10 @@
   (:use clojure.test
         flatland.protobuf.core)
   (:import Game$World
-           Game$World$Snake
-           Game$World$SnakeAttr))
+           Game$World$Snake))
 
 (def World (protodef Game$World))
 (def Snake (protodef Game$World$Snake))
-(def SnakeAttr (protodef Game$World$SnakeAttr))
 
 (defn proto=
   [class data]
