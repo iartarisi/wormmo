@@ -6,6 +6,7 @@
 (def ^:const directions [:up :down :left :right])
 
 (defn build-snake
+  "Create a new snake and return a list of cell hash-maps."
   [snake-size start-x start-y direction]
   (case direction
     :up (map hash-map
@@ -22,7 +23,7 @@
                (repeat :y) (repeat snake-size start-y))))
 
 (defn new-player
-  "Find a place for the new snake on the board"
+  "Place a new snake at a random place on the board."
   [world player]
   (let [safety (inc snake-size) ;; make sure we don't init out of bounds
         start-x (+ (rand-int (- board-size safety)) safety)
@@ -36,37 +37,31 @@
     (println (format "New player %s." player))))
 
 (defn grow-food
+  "Return the random location of a new food-pellet."
   []
   {:x (rand-int board-size)
    :y (rand-int board-size)})
 
 (defn delete-player
-  "Delete a snake from the world"
+  "Delete a snake from the world."
   [world player]
   (swap! world update-in [:snakes] dissoc player))
 
 (defn eat-food
+  "Make a food pellet disappear and replace it with a new one."
   [food cell]
   (conj (disj food cell) (grow-food)))
 
 (defn cell-forward
-  "Move a cell one step forward"
+  "Move a cell one step in the given direction."
   [{:keys [x y]} direction]
   (let [edge (dec board-size)]
     (zipmap [:x :y]
             (case direction
-              :up (if (= y 0)
-                    [x edge]
-                    [x (dec y)])
-              :right (if (= x edge)
-                       [0 y]
-                       [(inc x) y])
-              :down (if (= y edge)
-                      [x 0]
-                      [x (inc y)])
-              :left (if (= x 0)
-                      [edge y]
-                      [(dec x) y])))))
+              :up (if (= y 0) [x edge] [x (dec y)])
+              :right (if (= x edge) [0 y] [(inc x) y])
+              :down (if (= y edge) [x 0] [x (inc y)])
+              :left (if (= x 0) [edge y] [(dec x) y])))))
 
 (defn snake-forward
   "Move the snake forward one cell. Return a food set and a snake hash."
@@ -83,22 +78,28 @@
       :turn (snake :turn)}]))
 
 (defn collision?
+  "True if the given snake crashes into something."
   [snake world]
   ;; TODO: head-on-head collision
   (let [all-cells (flatten (map :cells (vals (world :snakes))))]
     (boolean (some #{(snake :head)} all-cells))))
 
 (defn tick
-  "Make one iteration in the world"
+  "Make one iteration in the world
+
+   Every snake moves forward one cell and the effects are triggered: eat
+   food, replace eaten food, remove crashed snakes."
   [world]
   (let [[snakes food] (reduce (fn [[snakes food] [player snake]]
                                 (let [[food snake] (snake-forward food snake)]
                                   [(conj snakes [player snake]) food]))
-                              [{} (world :food)] (world :snakes))
-        snakes (into {} (remove (fn [[player snake]] (collision? snake world)) snakes))]
-    {:snakes snakes :food food}))
+                              [{} (world :food)] (world :snakes))]
+    {:snakes (into {} (remove (fn [[_ snake]]
+                                  (collision? snake world)) snakes))
+     :food food}))
 
 (defn turn
+  "Turn a snake in the given direction"
   [world player whence]
   (if (get-in @world [:snakes player])
     (swap! world assoc-in [:snakes player :turn] whence)))

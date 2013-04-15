@@ -8,7 +8,6 @@
   (:use [thegame.serializer :only [serialize deserialize World Turn]]
         [thegame.snake :only [see-world]]))
 
-
 (defn queue-name [n] (format "player.%s" n))
 
 (defn create-handler
@@ -17,7 +16,7 @@
     [rch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
     (case type
       "time" (.send ws-ch (json/write-str
-                           {:type "upcase"
+                           {:type "timestamp"
                             :message (format "Player %s Time %s" player
                                              (String. payload "UTF-8"))}))
       "world" (let [world (deserialize World payload)]
@@ -33,7 +32,6 @@
     (lq/declare rch qname :exclusive false :auto-delete false)
     (lq/bind rch qname topic-name)
     (.start (Thread. #(lc/subscribe rch qname handler :auto-ack true)))))
-
 
 (defn conn-id [conn] (System/identityHashCode conn))
 
@@ -76,8 +74,8 @@
   (doto (WebServers/createWebServer 8080)
     (.add "/websocket"
           (proxy [WebSocketHandler] []
-            (onOpen [c] (ws-on_open c rchan))
-            (onClose [c] (ws-on_close c rchan))
-            (onMessage [c j] (ws-on_message c j rchan))))
+            (onOpen [conn] (ws-on_open conn rchan))
+            (onClose [conn] (ws-on_close conn rchan))
+            (onMessage [conn mess] (ws-on_message conn mess rchan))))
     (.add (StaticFileHandler. "resources/www"))
     (.start)))
