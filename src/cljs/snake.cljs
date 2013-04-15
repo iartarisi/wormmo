@@ -44,4 +44,3 @@
       (draw-snake s "red"))
     (doseq [f (world "food")]
       (draw-food f))))
-    ;; (map #(draw-snake % "red") (vals (world "others")))))

@@ -88,10 +88,6 @@
   (let [all-cells (flatten (map :cells (vals (world :snakes))))]
     (boolean (some #{(snake :head)} all-cells))))
 
-(defn update-vals
-  [hmap f]
-  (reduce #(update-in % [%2] f) hmap (keys hmap)))
-
 (defn tick
   "Make one iteration in the world"
   [world]
