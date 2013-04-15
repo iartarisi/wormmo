@@ -1,8 +1,8 @@
 (defproject thegame "0.1.0"
-  :description "generic server for simple mmo games"
-  :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :description "massively multiplayer online browser snake"
+  :url "http://github.com/mapleoin"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/clojurescript "0.0-1586"]
                  [io.netty/netty "3.5.4.Final"]

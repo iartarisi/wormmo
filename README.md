@@ -6,7 +6,7 @@ Massively Multiplayer Online Snake game.
 
 ## How it works
 
-Communication between the client and the server is done via WebSocket. WebSocket connections talk to the backend server via RabbitMQ + google protocol buffers. The backend servers does all the computation, the browser just paints the world and sends key events. The web frontend is a mix of javascript and clojurescript (compiled to javascript).
+Communication between the client and the server is done via WebSocket. WebSocket connections talk to the backend server via RabbitMQ + google protocol buffers. The backend servers does all the computation, the browser just paints the world and sends key events. The web frontend is a mix of javascript and clojurescript (itself compiled to javascript).
 
 
 ## What it looks like
@@ -36,6 +36,6 @@ One of the dependencies (netty) currently has trouble with Chromium. The project
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 Ionuț Arțăriși
 
 Distributed under the Eclipse Public License, the same as Clojure.
