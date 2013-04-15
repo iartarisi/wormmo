@@ -14,7 +14,7 @@
             [lein-protobuf "0.3.1"]]
   :cljsbuild {:builds
               [{:source-path "src/cljs"
-                :compiler {:output-to "snake.js"
+                :compiler {:output-to "resources/www/snake.js"
                            :optimizations :whitespace
                            :pretty-print true}}]}
   :main thegame.server)

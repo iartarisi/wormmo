@@ -79,5 +79,5 @@
             (onOpen [c] (ws-on_open c rchan))
             (onClose [c] (ws-on_close c rchan))
             (onMessage [c j] (ws-on_message c j rchan))))
-    (.add (StaticFileHandler. "."))
+    (.add (StaticFileHandler. "resources/www"))
     (.start)))
